@@ -1,6 +1,6 @@
 package com.graphtheory.djikstra.hackerrank.ctctBfs;
+
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Solution {
 
@@ -10,19 +10,20 @@ public class Solution {
 
         public Graph(int size) {
             nodes = new Node[size];
+            for (int i = 0; i < nodes.length; i++) {
+                nodes[i] = new Node();
+                nodes[i].dist = Integer.MAX_VALUE;
+                nodes[i].nodeId = i;
+            }
         }
 
         public void addEdge(int first, int second) {
 
-            if (nodes[first] == null) {
-                nodes[first] = new Node();
-                nodes[first].dist = Integer.MAX_VALUE;
+            if (nodes[first].edges == null) {
                 nodes[first].edges = new LinkedList<>();
             }
 
-            if (nodes[second] == null) {
-                nodes[second] = new Node();
-                nodes[second].dist = Integer.MAX_VALUE;
+            if (nodes[second].edges == null) {
                 nodes[second].edges = new LinkedList<>();
             }
 
@@ -44,35 +45,43 @@ public class Solution {
 
         private void djisktra(int startId) {
 
-            Set<Node> Q = new HashSet<Node>(Arrays.stream(nodes).filter(Objects::nonNull).collect(Collectors.toList()));
+            boolean[] minDistanceProcessedNodes = new boolean[nodes.length];
 
-            while (!Q.isEmpty()) {
+            int remaining = nodes.length;
 
-                Node u = findMin(Q);
+            while (remaining-- > 0) {
 
-                Q.remove(u);
+                Node u = findMin(nodes, minDistanceProcessedNodes);
 
-                for (Edge edge : u.edges) {
-                    Node t = edge.target;
-                    if (u.dist!=Integer.MAX_VALUE && u.dist + edge.weight < t.dist) {
-                        t.dist = (u.dist + edge.weight);
+                minDistanceProcessedNodes[u.nodeId] = true;
+
+                if (u.edges != null) {
+                    for (Edge edge : u.edges) {
+                        Node t = edge.target;
+                        if (u.dist != Integer.MAX_VALUE && u.dist + edge.weight < t.dist) {
+                            t.dist = (u.dist + edge.weight);
+                        }
                     }
                 }
             }
         }
 
 
-        private static Node findMin(Set<Node> q) {
-            return q.stream().filter(Objects::nonNull).min(
-                    (Node a, Node b) -> {
-                        return a.dist > b.dist ? 1 : -1;
-                    }
-            ).get();
+        private static Node findMin(Node[] nodes, boolean[] minDistanceProcessedNodes) {
+            return Arrays.stream(nodes)
+                    .filter(Objects::nonNull)
+                    .filter(n->minDistanceProcessedNodes[n.nodeId]==false)
+                    .min(
+                            (Node a, Node b) -> {
+                                return a.dist > b.dist ? 1 : -1;
+                            }
+                    ).get();
         }
 
         class Node {
             public int dist = Integer.MAX_VALUE;
             public List<Edge> edges;
+            public int nodeId;
         }
 
         class Edge {
