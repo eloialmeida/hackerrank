@@ -1,4 +1,4 @@
-package com.graphtheory.misc.hackerrank;
+package com.graphtheory.misc.hackerrank.runningMedian;
 
 import java.io.*;
 import java.util.*;
